@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #define SWAP(x,y) do {   \
    typeof(x) _x = x;      \
@@ -16,10 +18,14 @@ int *merge_sort(int *array, int *buffer, size_t left, size_t right);
 size_t partition(int array[], size_t low, size_t high);
 void quickSort(int array[], size_t low, size_t high);
 
+bool is_sorted(int array[static 1], size_t size);
+
 int main() {
 
-    int array[30];
-    int buffer[30];
+    const int N = 300;
+
+    int array[N];
+    int buffer[N];
     size_t array_size = sizeof(array) / sizeof(array[0]);
 
     // Initialize array with some random data
@@ -31,15 +37,16 @@ int main() {
 
     printf("Sorted with merge sort:\n");
     print_array(result, array_size);
+    printf("Order check %s\n\n\n", is_sorted(result, array_size) ? "PASSED" : "FAILED");
 
     init_random(array, array_size);
     printf("Initial state:\n");
     print_array(array, array_size);
 
     quickSort(array, 0, array_size - 1);
-
     printf("Sorted with quick sort:\n");
-    print_array(result, array_size);
+    print_array(array, array_size);
+    printf("Order check %s\n", is_sorted(array, array_size) ? "PASSED" : "FAILED");
 
     return 0;
 }
@@ -95,7 +102,12 @@ int *merge_sort(int *array, int *buffer, size_t left, size_t right) {
 void print_array(int array[static 1], size_t size) {
 
     for (size_t i = 0; i < size; i++) {
-        printf("%d\t", array[i]);
+        if (i) {
+            printf("\t%d", array[i]);
+        }
+        else {
+            printf("%d", array[i]);
+        }
     }
     printf("\n");
 }
@@ -126,4 +138,24 @@ size_t partition(int *array, size_t low, size_t high) {
     }
     SWAP(array[i + 1], array[high]);
     return (i + 1);
+}
+
+bool is_sorted(int *array, size_t size) {
+    if (size <= 1) {
+        return true;
+    }
+
+    int previous = array[0];
+    int *ptr = array + 1;
+    size_t n = size - 1;
+
+    while (n--) {
+        int next = *ptr;
+        if (next < previous) {
+            return false;
+        }
+        previous = next;
+        ptr++;
+    }
+    return true;
 }
